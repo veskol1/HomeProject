@@ -1,6 +1,11 @@
 package com.vesko.homeproject
 
+import android.Manifest.permission.READ_EXTERNAL_STORAGE
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.app.Activity
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.View.OnFocusChangeListener
@@ -8,8 +13,8 @@ import android.widget.Button
 import android.widget.DatePicker
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import com.bumptech.glide.Glide
-import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.datepicker.MaterialDatePicker.Builder.datePicker
 import com.google.android.material.textfield.TextInputEditText
 import java.util.*
@@ -20,38 +25,132 @@ class MainActivity : AppCompatActivity() {
     private lateinit var babyNameEditText: TextInputEditText
     private lateinit var selectedDateEditText: TextInputEditText
     private lateinit var nextButton: Button
+    private lateinit var changePic: Button
     private lateinit var babyImageView: ImageView
     private var nameFilled = false
     private var dateFilled = false
     private var babyAgeInMonths = 0
     private var babyAgeInYears = 0
+    private var selectedBabeBirthdayDay = 0
+    private var selectedBabeBirthdayMonth = 0
+    private var selectedBabeBirthdayYear = 0
+    private var babeBirthday = ""
+    private var uriImage = "" //will hold uri(string path) to the selected image from phones gallery
+    private val IMAGE_URL = "https://as2.ftcdn.net/jpg/02/16/85/19/500_F_216851969_42JnrCBh9acjRk3hkFRzfKLqoA3CpDmk.jpg"
+    private val BABE_AGE_YEARS = "com.vesko.homeproject.mainactivty.babyAgeYears"
+    private val BABE_AGE_MONTHS = "com.vesko.homeproject.mainactivty.babyAgeMonths"
+    private val BABE_NAME = "com.vesko.homeproject.mainactivty.babysName"
+    private val IMAGE_PICK_CODE = 1005
+    private val PERMISSION_CODE_READ = 1001
+    private val PERMISSION_CODE_WRITE = 1002
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        babyNameEditText = findViewById(R.id.baby_name_edit_text)
-        selectedDateEditText = findViewById(R.id.date_select)
-        nextButton = findViewById(R.id.show_birthday_screen_button)
-        babyImageView = findViewById(R.id.baby_image_view)
 
-        focusFunctionalityNameEditText()
-        focusAndClickFunctionalityDatePicker()
+        initialize()
+        updateUI()
+        checkIfDetailedFilled()
 
-        Glide.with(this).load("https://as2.ftcdn.net/jpg/02/16/85/19/500_F_216851969_42JnrCBh9acjRk3hkFRzfKLqoA3CpDmk.jpg").into(
-            babyImageView
-        )
+        focusFunctionalityOnNameEditText()
+        focusAndClickFunctionalityOnDatePicker()
+
+        changePic.setOnClickListener {
+            checkPermissionForImage()
+            pickImageFromGallery()
+        }
 
         nextButton.setOnClickListener {
-           // val intent = Intent(this, DetailsActivity::class.java)
-            intent.putExtra("com.vesko.homeproject.mainactivty.babyAgeYears",babyAgeInYears)
-            intent.putExtra("com.vesko.homeproject.mainactivty.babyAgeMonths",babyAgeInMonths)
-            intent.putExtra("com.vesko.homeproject.mainactivty.babysName", babyNameEditText.text.toString())
+            saveData()
+            val intent = Intent(this, DetailsActivity::class.java)
+            intent.putExtra(BABE_AGE_YEARS, babyAgeInYears)
+            intent.putExtra(BABE_AGE_MONTHS, babyAgeInMonths)
+            intent.putExtra(BABE_NAME, babyNameEditText.text.toString())
             startActivity(intent)
         }
     }
 
+    /*using shared preferences to store data and restore data after app restarts*/
+    private fun saveData() {
+        val sharedPref = this.getPreferences(Context.MODE_PRIVATE) ?: return
+        with(sharedPref.edit()) {
+            putString(getString(R.string.save_baby_name), babyNameEditText.text.toString())
+            putString(getString(R.string.save_baby_birthday), selectedDateEditText.text.toString())
+            putInt(getString(R.string.save_baby_birthday_day), selectedBabeBirthdayDay)
+            putInt(getString(R.string.save_baby_birthday_month), selectedBabeBirthdayMonth)
+            putInt(getString(R.string.save_baby_birthday_year), selectedBabeBirthdayYear)
+            if(uriImage.isNotEmpty())
+                putString(getString(R.string.save_loaded_image_uri), uriImage)
+            apply()
+        }
+    }
 
-    private fun focusFunctionalityNameEditText() {
+
+    private fun updateUI() {
+        if(uriImage.isNotEmpty()) {
+            checkPermissionForImage()
+            babyImageView.setImageURI(uriImage.toUri())
+        }
+        else{
+            Glide.with(this)
+                .load(IMAGE_URL)
+                .into(babyImageView)
+        }
+
+    }
+
+
+    private fun initialize() {
+        babyNameEditText = findViewById(R.id.baby_name_edit_text)
+        selectedDateEditText = findViewById(R.id.date_select)
+        nextButton = findViewById(R.id.show_birthday_screen_button)
+        changePic = findViewById(R.id.change_picture_button)
+        babyImageView = findViewById(R.id.baby_image_view)
+
+        val sharedPref = this.getPreferences(Context.MODE_PRIVATE)
+
+        if(sharedPref!= null){
+            val babeName = sharedPref.getString(getString(R.string.save_baby_name), "")
+            babyNameEditText.setText(babeName)
+            val birthDayString = sharedPref.getString(getString(R.string.save_baby_birthday), "")
+            selectedDateEditText.setText(birthDayString)
+            selectedBabeBirthdayDay = sharedPref.getInt(getString(R.string.save_baby_birthday_day),0)
+            selectedBabeBirthdayMonth = sharedPref.getInt(getString(R.string.save_baby_birthday_month),0)
+            selectedBabeBirthdayYear = sharedPref.getInt(getString(R.string.save_baby_birthday_year),0)
+            calculateBabyAge()
+            uriImage = sharedPref.getString(getString(R.string.save_loaded_image_uri), "").toString()
+        }
+    }
+
+
+    private fun checkPermissionForImage() {
+        if ((checkSelfPermission(READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED)
+            && (checkSelfPermission(WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_DENIED)) {
+            requestPermissions(arrayOf(READ_EXTERNAL_STORAGE), PERMISSION_CODE_READ) // GIVE AN INTEGER VALUE FOR PERMISSION_CODE_READ LIKE 1001
+            requestPermissions(arrayOf(WRITE_EXTERNAL_STORAGE), PERMISSION_CODE_WRITE) // GIVE AN INTEGER VALUE FOR PERMISSION_CODE_WRITE LIKE 1002
+        }
+    }
+
+    private fun pickImageFromGallery() {
+        val photoPickerIntent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+        photoPickerIntent.type = "image/*"
+        startActivityForResult(photoPickerIntent, IMAGE_PICK_CODE) // GIVE AN INTEGER VALUE FOR IMAGE_PICK_CODE LIKE 1000
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (resultCode == Activity.RESULT_OK && requestCode == IMAGE_PICK_CODE) {
+            babyImageView.setImageURI(data?.data)
+            uriImage = data?.data.toString()
+
+
+        }
+    }
+
+
+    private fun focusFunctionalityOnNameEditText() {
         babyNameEditText.onFocusChangeListener = OnFocusChangeListener { _, hasFocus ->
             if (!hasFocus){
                 if (babyNameEditText.text?.isEmpty() == true) {
@@ -68,7 +167,7 @@ class MainActivity : AppCompatActivity() {
 
 
     //this function is responsible on updating the Date textView after picking the date we want
-    private fun focusAndClickFunctionalityDatePicker() {
+    private fun focusAndClickFunctionalityOnDatePicker() {
 
         val builder = datePicker()
         builder.setTitleText("Select birthday date")
@@ -94,13 +193,9 @@ class MainActivity : AppCompatActivity() {
         //updates the textView with the selected Date
         materialDatePicker.addOnPositiveButtonClickListener {
             this.selectedDateEditText.setText(materialDatePicker.headerText)
-
-
-            Log.d("here","here1=")
             val selectedBirthday = Calendar.getInstance(TimeZone.getDefault())
             selectedBirthday.time = Date(it)
             calculateBabyAge(selectedBirthday)
-            Log.d("here","here3=")
         }
 
 
@@ -113,40 +208,51 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun calculateBabyAge(birthdayDate: Calendar) {
+    private fun calculateBabyAge(birthdayDate: Calendar? = null) {
         val date = DatePicker(this)
-        Log.d("here","here2=")
-        val selectedDay = birthdayDate.get(Calendar.DAY_OF_MONTH)
-        val selectedMonth = birthdayDate.get(Calendar.MONTH) + 1
-        val selectedYear = birthdayDate.get(Calendar.YEAR)
+
+        if (birthdayDate != null) {
+            babyAgeInYears = 0
+            babyAgeInMonths = 0
+
+            selectedBabeBirthdayDay = birthdayDate.get(Calendar.DAY_OF_MONTH)
+            selectedBabeBirthdayMonth = birthdayDate.get(Calendar.MONTH) + 1
+            selectedBabeBirthdayYear = birthdayDate.get(Calendar.YEAR)
+
+        }
 
         val todayDay = date.dayOfMonth
         val todayMonth = date.month + 1
         val todayYear = date.year
 
-        if ((todayYear - selectedYear) > 0)
-            babyAgeInYears = todayYear - selectedYear
-        else if (todayMonth > selectedMonth){
-            if(todayDay >= selectedDay){
-                babyAgeInMonths = todayMonth - selectedMonth
+        when {
+            (todayYear > selectedBabeBirthdayYear) -> {
+                if ( (todayMonth > selectedBabeBirthdayMonth) || ((todayMonth == selectedBabeBirthdayMonth) && (todayDay >= selectedBabeBirthdayDay)))
+                    babyAgeInYears = todayYear - selectedBabeBirthdayYear
+                else if ( (todayMonth < selectedBabeBirthdayMonth) || ((todayMonth == selectedBabeBirthdayMonth) && (todayDay < selectedBabeBirthdayDay)))
+                    babyAgeInYears = todayYear - selectedBabeBirthdayYear - 1
+                babyAgeInMonths = if ((babyAgeInYears == 0) && (todayDay < selectedBabeBirthdayDay)) //get months of baby if he is under 1 years age
+                    12 - selectedBabeBirthdayMonth + todayMonth - 1
+                else
+                    12 - selectedBabeBirthdayMonth + todayMonth
             }
-            else{
-                babyAgeInMonths = todayMonth - selectedMonth - 1
+            (todayMonth > selectedBabeBirthdayMonth) -> {
+                babyAgeInMonths = if(todayDay >= selectedBabeBirthdayDay){
+                    todayMonth - selectedBabeBirthdayMonth
+                } else{
+                    todayMonth - selectedBabeBirthdayMonth - 1
+                }
+            }
+            else -> {
+                babyAgeInYears = 0
+                babyAgeInMonths = 0
             }
         }
-        else {
-            babyAgeInYears = 0
-            babyAgeInMonths = 0
-        }
-
-        Log.d("here","babyAgeInMonths="+babyAgeInMonths)
-        Log.d("here","babyAgeInYears="+babyAgeInYears)
-
     }
 
 
     private fun checkIfDetailedFilled() {
-        if (dateFilled && nameFilled)
+        if ((dateFilled && nameFilled) || ((babyNameEditText.text?.isNotEmpty() == true) && (selectedDateEditText.text?.isNotEmpty() == true)))
             nextButton.isEnabled = true
     }
 

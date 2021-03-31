@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="44dp"
-        android:text="Nanit App"
+        android:text="@string/title_main_activity_app"
         android:textSize="36sp"
 
         android:textStyle="bold"
@@ -37,7 +37,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:hint="Baby name"
+            android:hint="@string/title_hint_baby_name"
+
             app:boxBackgroundColor="@color/green">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -46,7 +47,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:maxLines="1"/>
+                android:maxLines="1"
+                android:singleLine="true"
+              />
 
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -56,14 +59,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:hint="Birthday"
+            android:hint="@string/title_hint_birthday"
             app:boxBackgroundColor="@color/green">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/date_select"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:editable="false"
                 android:gravity="center"
                 android:inputType="text" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -79,9 +81,19 @@
                 android:id="@+id/baby_image_view"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
-                android:scaleType="centerCrop" />
+                android:scaleType="centerCrop"
+                android:contentDescription="@string/description_babys_image" />
 
         </com.google.android.material.card.MaterialCardView>
+
+        <Button
+            android:id="@+id/change_picture_button"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:text="change pic" />
 
         <Button
             android:id="@+id/show_birthday_screen_button"
@@ -91,7 +103,7 @@
             android:layout_gravity="center"
             android:layout_marginTop="30dp"
             android:enabled="false"
-            android:text="Show birthday screen" />
+            android:text="@string/button_text_show_birthday_screen" />
 
 
     </LinearLayout>

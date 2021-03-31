@@ -1,3 +1,35 @@
 <resources>
     <string name="app_name">HomeProject</string>
+
+    <string name="baby_name">TODAY %1$s IS</string>
+    <string name="baby_age">%1$s OLD!</string>
+
+    <string name="title_hint_baby_name">Baby name</string>
+    <string name="title_hint_birthday">Birthday</string>
+    <string name="button_text_show_birthday_screen">Show Birthday Screen</string>
+    <string name="title_main_activity_app">Nanit App</string>
+    <string name="description_babys_image">Baby\'s Image</string>
+    <string name="description_placeholder_image">placeholder image</string>
+    <string name="description_background_image">background image</string>
+    <string name="description_backpress_image_button">backpress image button</string>
+    <string name="title_baby_page">Today Cristiana Ronaldo is</string>
+    <string name="description_baby_age_image">baby age image</string>
+    <string name="description_left_swirls">left swirls</string>
+    <string name="description_right_swirls">right swirls</string>
+    <string name="title_baby_months_old">MONTHS OLD!</string>
+    <string name="description_share_button_image">share button image</string>
+    <string name="title_share_the_news_button">Share the news</string>
+    <string name="description_share_icon">share icon</string>
+    <string name="description_camera_image_button">camera image button</string>
+
+
+    <string name="save_baby_name">save_baby_name</string>
+    <string name="save_baby_birthday">save_baby_birthday</string>
+    <string name="save_loaded_image_uri">save_loaded_image_uri</string>
+
+    <string name="save_baby_birthday_day">save_baby_birthday_day</string>
+    <string name="save_baby_birthday_month">save_baby_birthday_month</string>
+    <string name="save_baby_birthday_year">save_baby_birthday_year</string>
+
+
 </resources>
