@@ -30,6 +30,7 @@
     <string name="save_baby_birthday_day">save_baby_birthday_day</string>
     <string name="save_baby_birthday_month">save_baby_birthday_month</string>
     <string name="save_baby_birthday_year">save_baby_birthday_year</string>
+    <string name="change_pic_button">change pic</string>
 
 
 </resources>

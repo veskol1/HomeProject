@@ -124,46 +124,56 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/number_image_view" />
 
-
-    <ImageButton
-        android:id="@+id/share_button"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/share_button_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
-        android:background="@android:color/transparent"
-        android:clickable="true"
-        android:focusable="true"
-        android:foreground="?selectableItemBackground"
-        android:src="@drawable/btn_share"
+        android:contentDescription="@string/description_share_button_image"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/months_years_text_view"
-        android:contentDescription="@string/description_share_button_image" />
+        app:layout_constraintTop_toBottomOf="@+id/months_years_text_view">
 
-    <TextView
-        android:id="@+id/share_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="2dp"
-        android:text="@string/title_share_the_news_button"
-        android:textColor="#EF7B7B"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/share_button"
-        app:layout_constraintEnd_toStartOf="@+id/share_icon"
-        app:layout_constraintStart_toStartOf="@+id/share_button"
-        app:layout_constraintTop_toTopOf="@+id/share_button" />
+        <ImageButton
+            android:id="@+id/share_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
 
-    <ImageView
-        android:id="@+id/share_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="2dp"
-        android:background="@drawable/ic_share_pink"
-        app:layout_constraintBottom_toBottomOf="@+id/share_button"
-        app:layout_constraintEnd_toEndOf="@+id/share_button"
-        app:layout_constraintTop_toTopOf="@+id/share_button"
-        android:contentDescription="@string/description_share_icon" />
+            android:background="@android:color/transparent"
+            android:clickable="true"
+            android:contentDescription="@string/description_share_button_image"
+            android:focusable="true"
+            android:foreground="?selectableItemBackground"
+            android:src="@drawable/btn_share"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/share_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="2dp"
+            android:text="@string/title_share_the_news_button"
+            android:textColor="#EF7B7B"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@+id/share_button"
+            app:layout_constraintEnd_toStartOf="@+id/share_icon"
+            app:layout_constraintStart_toStartOf="@+id/share_button"
+            app:layout_constraintTop_toTopOf="@+id/share_button" />
+
+        <ImageView
+            android:id="@+id/share_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="2dp"
+            android:background="@drawable/ic_share_pink"
+            android:contentDescription="@string/description_share_icon"
+            app:layout_constraintBottom_toBottomOf="@+id/share_button"
+            app:layout_constraintEnd_toEndOf="@+id/share_button"
+            app:layout_constraintTop_toTopOf="@+id/share_button" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <ImageButton
         android:id="@+id/camera_button"

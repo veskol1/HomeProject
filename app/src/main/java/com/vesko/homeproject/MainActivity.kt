@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
 import android.view.View.OnFocusChangeListener
 import android.widget.Button
 import android.widget.DatePicker
@@ -25,7 +24,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var babyNameEditText: TextInputEditText
     private lateinit var selectedDateEditText: TextInputEditText
     private lateinit var nextButton: Button
-    private lateinit var changePic: Button
+    private lateinit var changePicButton: Button
     private lateinit var babyImageView: ImageView
     private var nameFilled = false
     private var dateFilled = false
@@ -57,7 +56,7 @@ class MainActivity : AppCompatActivity() {
         focusFunctionalityOnNameEditText()
         focusAndClickFunctionalityOnDatePicker()
 
-        changePic.setOnClickListener {
+        changePicButton.setOnClickListener {
             checkPermissionForImage()
             pickImageFromGallery()
         }
@@ -81,8 +80,6 @@ class MainActivity : AppCompatActivity() {
             putInt(getString(R.string.save_baby_birthday_day), selectedBabeBirthdayDay)
             putInt(getString(R.string.save_baby_birthday_month), selectedBabeBirthdayMonth)
             putInt(getString(R.string.save_baby_birthday_year), selectedBabeBirthdayYear)
-            if(uriImage.isNotEmpty())
-                putString(getString(R.string.save_loaded_image_uri), uriImage)
             apply()
         }
     }
@@ -106,7 +103,7 @@ class MainActivity : AppCompatActivity() {
         babyNameEditText = findViewById(R.id.baby_name_edit_text)
         selectedDateEditText = findViewById(R.id.date_select)
         nextButton = findViewById(R.id.show_birthday_screen_button)
-        changePic = findViewById(R.id.change_picture_button)
+        changePicButton = findViewById(R.id.change_picture_button)
         babyImageView = findViewById(R.id.baby_image_view)
 
         val sharedPref = this.getPreferences(Context.MODE_PRIVATE)
@@ -145,6 +142,12 @@ class MainActivity : AppCompatActivity() {
             babyImageView.setImageURI(data?.data)
             uriImage = data?.data.toString()
 
+            //save after restart
+            val sharedPref = this.getPreferences(Context.MODE_PRIVATE) ?: return
+            with(sharedPref.edit()) {
+                putString(getString(R.string.save_loaded_image_uri), uriImage)
+                apply()
+            }
 
         }
     }
@@ -249,8 +252,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
-
+    
     private fun checkIfDetailedFilled() {
         if ((dateFilled && nameFilled) || ((babyNameEditText.text?.isNotEmpty() == true) && (selectedDateEditText.text?.isNotEmpty() == true)))
             nextButton.isEnabled = true
