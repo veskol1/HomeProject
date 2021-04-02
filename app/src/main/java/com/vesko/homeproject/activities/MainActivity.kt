@@ -1,4 +1,4 @@
-package com.vesko.homeproject
+package com.vesko.homeproject.activities
 
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -16,6 +16,7 @@ import androidx.core.net.toUri
 import com.bumptech.glide.Glide
 import com.google.android.material.datepicker.MaterialDatePicker.Builder.datePicker
 import com.google.android.material.textfield.TextInputEditText
+import com.vesko.homeproject.R
 import java.util.*
 
 
@@ -33,12 +34,12 @@ class MainActivity : AppCompatActivity() {
     private var selectedBabeBirthdayDay = 0
     private var selectedBabeBirthdayMonth = 0
     private var selectedBabeBirthdayYear = 0
-    private var babeBirthday = ""
     private var uriImage = "" //will hold uri(string path) to the selected image from phones gallery
     private val IMAGE_URL = "https://as2.ftcdn.net/jpg/02/16/85/19/500_F_216851969_42JnrCBh9acjRk3hkFRzfKLqoA3CpDmk.jpg"
-    private val BABE_AGE_YEARS = "com.vesko.homeproject.mainactivty.babyAgeYears"
-    private val BABE_AGE_MONTHS = "com.vesko.homeproject.mainactivty.babyAgeMonths"
-    private val BABE_NAME = "com.vesko.homeproject.mainactivty.babysName"
+    private val BABE_AGE_YEARS = "com.vesko.homeproject.mainactivty.activities.babyAgeYears"
+    private val BABE_AGE_MONTHS = "com.vesko.homeproject.mainactivty.activities.babyAgeMonths"
+    private val BABE_NAME = "com.vesko.homeproject.mainactivty.activities.babysName"
+    private val BABE_IMAGE = "com.vesko.homeproject.mainactivtyactivities.babysImage"
     private val IMAGE_PICK_CODE = 1005
     private val PERMISSION_CODE_READ = 1001
     private val PERMISSION_CODE_WRITE = 1002
@@ -67,6 +68,7 @@ class MainActivity : AppCompatActivity() {
             intent.putExtra(BABE_AGE_YEARS, babyAgeInYears)
             intent.putExtra(BABE_AGE_MONTHS, babyAgeInMonths)
             intent.putExtra(BABE_NAME, babyNameEditText.text.toString())
+            intent.putExtra(BABE_IMAGE, uriImage)
             startActivity(intent)
         }
     }
@@ -84,7 +86,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
     private fun updateUI() {
         if(uriImage.isNotEmpty()) {
             checkPermissionForImage()
@@ -95,9 +96,7 @@ class MainActivity : AppCompatActivity() {
                 .load(IMAGE_URL)
                 .into(babyImageView)
         }
-
     }
-
 
     private fun initialize() {
         babyNameEditText = findViewById(R.id.baby_name_edit_text)
@@ -113,9 +112,18 @@ class MainActivity : AppCompatActivity() {
             babyNameEditText.setText(babeName)
             val birthDayString = sharedPref.getString(getString(R.string.save_baby_birthday), "")
             selectedDateEditText.setText(birthDayString)
-            selectedBabeBirthdayDay = sharedPref.getInt(getString(R.string.save_baby_birthday_day),0)
-            selectedBabeBirthdayMonth = sharedPref.getInt(getString(R.string.save_baby_birthday_month),0)
-            selectedBabeBirthdayYear = sharedPref.getInt(getString(R.string.save_baby_birthday_year),0)
+            selectedBabeBirthdayDay = sharedPref.getInt(
+                getString(R.string.save_baby_birthday_day),
+                0
+            )
+            selectedBabeBirthdayMonth = sharedPref.getInt(
+                getString(R.string.save_baby_birthday_month),
+                0
+            )
+            selectedBabeBirthdayYear = sharedPref.getInt(
+                getString(R.string.save_baby_birthday_year),
+                0
+            )
             calculateBabyAge()
             uriImage = sharedPref.getString(getString(R.string.save_loaded_image_uri), "").toString()
         }
@@ -148,7 +156,6 @@ class MainActivity : AppCompatActivity() {
                 putString(getString(R.string.save_loaded_image_uri), uriImage)
                 apply()
             }
-
         }
     }
 
@@ -211,6 +218,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
     private fun calculateBabyAge(birthdayDate: Calendar? = null) {
         val date = DatePicker(this)
 
@@ -221,12 +229,11 @@ class MainActivity : AppCompatActivity() {
             selectedBabeBirthdayDay = birthdayDate.get(Calendar.DAY_OF_MONTH)
             selectedBabeBirthdayMonth = birthdayDate.get(Calendar.MONTH) + 1
             selectedBabeBirthdayYear = birthdayDate.get(Calendar.YEAR)
-
         }
-
         val todayDay = date.dayOfMonth
         val todayMonth = date.month + 1
         val todayYear = date.year
+
 
         when {
             (todayYear > selectedBabeBirthdayYear) -> {
@@ -235,6 +242,8 @@ class MainActivity : AppCompatActivity() {
                 else if ( (todayMonth < selectedBabeBirthdayMonth) || ((todayMonth == selectedBabeBirthdayMonth) && (todayDay < selectedBabeBirthdayDay)))
                     babyAgeInYears = todayYear - selectedBabeBirthdayYear - 1
                 babyAgeInMonths = if ((babyAgeInYears == 0) && (todayDay < selectedBabeBirthdayDay)) //get months of baby if he is under 1 years age
+                    12 - selectedBabeBirthdayMonth + todayMonth - 1
+                else if(todayDay < selectedBabeBirthdayDay)
                     12 - selectedBabeBirthdayMonth + todayMonth - 1
                 else
                     12 - selectedBabeBirthdayMonth + todayMonth
